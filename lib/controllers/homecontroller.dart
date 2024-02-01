@@ -1,5 +1,5 @@
+import 'package:Asidoto/models/produit.dart';
 import 'package:get/state_manager.dart';
-import 'package:myapp1/models/produit.dart';
 
 class HomeController extends GetxController{
   var todo = <TodoList>[].obs;
@@ -11,7 +11,7 @@ class HomeController extends GetxController{
 }
 
 void fetchTodoList() async{
-  await Future.delayed(Duration(seconds: 1));
+  await Future.delayed(Duration(seconds: 30));
 
 }
 
