@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 
+class TodoScreen extends StatelessWidget {
+  const TodoScreen({Key? key}) : super(key: key);
 
-class TodosScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('To-dos')),
-      body: Center(child: Text('To-dos Screen')),
+    return Center(
+      child: Text(
+        'Functionality not available',
+        style: TextStyle(fontSize: 20),
+      ),
     );
   }
 }

@@ -1,22 +1,67 @@
+import 'dart:ui';
+
+import 'package:Asidoto/views/EditScreen.dart';
+import 'package:Asidoto/views/addNotes.dart';
 import 'package:flutter/material.dart';
 import 'package:Asidoto/controllers/homecontroller.dart';
 import 'package:Asidoto/controllers/todoformcontroller.dart';
 import 'package:Asidoto/models/produit.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 class NotesScreen extends StatelessWidget {
   final HomeController homeController = Get.put(HomeController());
-  final TodoFormController formController = TodoFormController();
-  String _formatDate(DateTime date) {
-  // Format the date as needed
-  return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute}';
+  final TodoFormController formController = Get.put(TodoFormController());
+String _formatDate(DateTime date) {
+  return '${_getMonthAbbreviation(date.month)} ${date.day}, ${date.year}';
+}
+
+String _getMonthAbbreviation(int month) {
+  switch (month) {
+    case 1:
+      return 'Jan';
+    case 2:
+      return 'Feb';
+    case 3:
+      return 'Mar';
+    case 4:
+      return 'Apr';
+    case 5:
+      return 'May';
+    case 6:
+      return 'Jun';
+    case 7:
+      return 'Jul';
+    case 8:
+      return 'Aug';
+    case 9:
+      return 'Sep';
+    case 10:
+      return 'Oct';
+    case 11:
+      return 'Nov';
+    case 12:
+      return 'Dec';
+    default:
+      return '';
+  }
 }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Notes')),
+      appBar: AppBar(
+        title: Text('Mes taches'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              _showAboutUsDialog(context);
+            },
+            icon: Icon(Icons.info),
+          ),
+        ],
+      ),
       body: GetX<HomeController>(
         builder: (controller) {
           if (controller.todo.isEmpty) {
@@ -57,13 +102,17 @@ class NotesScreen extends StatelessWidget {
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(todoItem.description),
                           SizedBox(height: 4),
-                          Text('Date: ${_formatDate(todoItem.datePublished)}'),
+                          Text('${_formatDate(todoItem.datePublished)} '),
                         ],
                       ),
                       onTap: () {
-                        _showTaskDetailsDialog(context, todoItem);
+          
+  Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (context) => EditTodoPage(todoItem: todoItem),
+    ),
+  );
                       },
                       leading: Icon(
                         Icons.info,
@@ -76,93 +125,28 @@ class NotesScreen extends StatelessWidget {
             );
           }
         },
-      ),  floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _showAddTodoDialog(context, formController, homeController);
+      ), 
+      floatingActionButton: ClipOval(
+    child: Material(
+      color: Colors.blue, // button color
+      child: InkWell(
+        splashColor: Colors.white, // splash color
+        onTap: () {
+          _showAddTodoScreen(context, formController, homeController);
         },
-
-        child: Icon(Icons.add),backgroundColor:Colors.blue,foregroundColor: Colors.white,
-        
-      ),
-    );
-  }
-
-
-
-void _showTaskDetailsDialog(BuildContext context, TodoList todoItem) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text('Détails de la tâche'),
-        content: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Titre : ${todoItem.title}'),
-            SizedBox(height: 8),
-            Text('Description : ${todoItem.description}'),
-          ],
+        child: SizedBox(
+          width: 56,
+          height: 56,
+          child: Icon(Icons.add, color: Colors.white),
         ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: Text('Fermer'),
-          ),
-        ],
-      );
-    },
-  );
-}
-  void _showAddTodoDialog(BuildContext context,
-      TodoFormController formController, HomeController controller) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Ajouter une tache'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: formController.titleController,
-                decoration: InputDecoration(labelText: 'Titre'),
-              ),
-              TextField(
-                controller: formController.descriptionController,
-                decoration: InputDecoration(labelText: 'Description'),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('Annuller'),
-            ),
-            TextButton(
-              onPressed: () {
-                controller.addTodo(
-                  TodoList(
-                    id: controller.todo.length + 1,
-                    title: formController.titleController.text,
-                    description: formController.descriptionController.text,
-                  ),
-                );
-                formController.clearFields();
-                Navigator.of(context).pop();
-              },
-              child: Text('Ajouter'),
-            ),
-          ],
-        );
-      },
+      ),
+    ),
+      )
     );
   }
-}
+
+
+
 
 void _showDeleteConfirmationDialog(
     BuildContext context, HomeController controller, TodoList todoItem) {
@@ -177,7 +161,7 @@ void _showDeleteConfirmationDialog(
             onPressed: () {
               Navigator.of(context).pop();
             },
-            child: Text('Cancel'),
+            child: Text('Annuler'),
           ),
           TextButton(
             onPressed: () {
@@ -185,9 +169,48 @@ void _showDeleteConfirmationDialog(
                   .deleteTodo(todoItem); // Add the method to delete the todo
               Navigator.of(context).pop();
             },
-            child: Text('Delete'),
+            child: Text('Supprimer'),
           ),
         ],
+      );
+    },
+  );
+}
+void _showAddTodoScreen(BuildContext context, TodoFormController formController, HomeController controller) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => AddTaskScreen()),
+    );
+  }
+}
+
+void _showAboutUsDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+        child: AlertDialog(
+          title: Text('Qui suis-je ?'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Créé par Asidev'),
+              SizedBox(height: 8),
+              Text('Suivez-nous sur Facebook pour plus d\'informations:'),
+              SizedBox(height: 7),
+              Text('Facebook: @Asidev'),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Fermer'),
+            ),
+          ],
+        ),
       );
     },
   );
